@@ -1,121 +1,86 @@
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>中学生英単語タイピングゲーム</title>
+  <meta charset="UTF-8">
+  <title><クソ打タイピングゲーム</title>
   <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background: #f0f8ff;
-    }
-    #word {
-      font-size: 2em;
-      margin-bottom: 1em;
-    }
-    #input {
-      font-size: 1.5em;
-      padding: 0.5em;
-    }
-    #score, #timer {
-      margin: 1em;
-      font-size: 1.2em;
-    }
-    #translation {
-      font-size: 1em;
-      color: #555;
-      margin-bottom: 1em;
-    }
+    body { font-family: sans-serif; text-align: center; background-color: #f5f5f5; }
+    h1 { margin-top: 30px; }
+    #game { margin: 20px auto; padding: 20px; background: white; border-radius: 10px; width: 500px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    #word { font-size: 24px; margin: 10px 0; }
+    #meaning { font-size: 18px; color: gray; }
+    #input { width: 80%; padding: 10px; font-size: 18px; }
+    #score, #timer { font-size: 20px; margin-top: 10px; }
+    #result { font-size: 22px; margin-top: 20px; color: green; }
   </style>
 </head>
 <body>
-  <h1>英単語タイピングゲーム</h1>
-  <div id="timer">残り時間: 30秒</div>
-  <div id="score">スコア: 0</div>
-  <div id="word"></div>
-  <div id="translation"></div>
-  <input type="text" id="input" autocomplete="off" autofocus />
+  <h1>クソ打</h1>
+  <div id="game">
+    <div id="word">Loading...</div>
+    <div id="meaning"></div>
+    <input type="text" id="input" autofocus />
+    <div id="score">Score: 0</div>
+    <div id="timer">Time: 30</div>
+    <div id="result"></div>
+  </div>
 
   <script>
-    const wordsWithTranslations = [
-      ["apple", "りんご"], ["banana", "バナナ"], ["cat", "ねこ"], ["dog", "いぬ"], ["egg", "たまご"],
-      ["fish", "さかな"], ["goat", "やぎ"], ["hat", "ぼうし"], ["ice", "こおり"], ["juice", "ジュース"],
-      ["kite", "たこ（凧）"], ["lion", "ライオン"], ["moon", "つき"], ["nest", "す（巣）"], ["orange", "オレンジ"],
-      ["pen", "ペン"], ["queen", "じょおう（女王）"], ["rose", "バラ"], ["sun", "たいよう"], ["tree", "き（木）"],
-      ["umbrella", "かさ（傘）"], ["van", "バン（車）"], ["water", "みず"], ["xray", "レントゲン"], ["yarn", "あみもの糸"], ["zoo", "どうぶつえん"],
-      ["book", "ほん"], ["chair", "いす"], ["desk", "つくえ"], ["ear", "みみ"], ["frog", "かえる"],
-      ["game", "ゲーム"], ["hand", "て（手）"], ["island", "しま（島）"], ["jelly", "ゼリー"], ["king", "おう（王）"],
-      ["lamp", "ランプ"], ["milk", "ぎゅうにゅう"], ["net", "あみ"], ["ocean", "たいよう（大洋）"], ["pencil", "えんぴつ"],
-      ["quiz", "クイズ"], ["rain", "あめ（雨）"], ["star", "ほし"], ["tiger", "トラ"], ["uncle", "おじ"],
-      ["vase", "かびん"], ["wind", "かぜ（風）"], ["xylophone", "もっきん（木琴）"], ["yard", "にわ"], ["zip", "チャック／ファスナー"],
-      ["blue", "あお（青）"], ["red", "あか（赤）"], ["green", "みどり（緑）"], ["yellow", "きいろ（黄色）"], ["white", "しろ（白）"],
-      ["black", "くろ（黒）"], ["cold", "さむい"], ["hot", "あつい"], ["fast", "はやい"], ["slow", "おそい"],
-      ["big", "おおきい"], ["small", "ちいさい"], ["happy", "うれしい"], ["sad", "かなしい"], ["kind", "やさしい"],
-      ["mean", "いじわるな"], ["soft", "やわらかい"], ["hard", "かたい"], ["light", "かるい／あかるい"], ["dark", "くらい"],
-      ["clean", "きれいな"], ["dirty", "きたない"], ["early", "はやい（時間）"], ["late", "おそい（時間）"], ["rich", "おかねもち"],
-      ["poor", "びんぼうな"], ["sweet", "あまい"], ["sour", "すっぱい"], ["tall", "せがたかい"], ["short", "みじかい／ひくい"],
-      ["young", "わかい"], ["old", "としをとった"], ["nice", "すてきな"], ["bad", "わるい"], ["warm", "あたたかい"],
-      ["cool", "すずしい"], ["fun", "たのしい"], ["boring", "たいくつな"], ["smart", "あたまがいい"], ["dull", "のろい／たいくつな"],
-      ["safe", "あんぜんな"], ["risky", "あぶない"], ["sharp", "するどい"], ["quiet", "しずかな"], ["loud", "うるさい"],
-      ["neat", "きちんとした"], ["messy", "ちらかった"]
+    const words = [
+      { en: "apple", ja: "りんご" }, { en: "book", ja: "本" }, { en: "cat", ja: "猫" },
+      { en: "dog", ja: "犬" }, { en: "egg", ja: "卵" }, { en: "fish", ja: "魚" },
+      { en: "grape", ja: "ぶどう" }, { en: "hat", ja: "帽子" }, { en: "ice", ja: "氷" },
+      { en: "juice", ja: "ジュース" }, { en: "kite", ja: "凧" }, { en: "lion", ja: "ライオン" },
+      { en: "moon", ja: "月" }, { en: "nest", ja: "巣" }, { en: "orange", ja: "オレンジ" },
+      { en: "pen", ja: "ペン" }, { en: "queen", ja: "女王" }, { en: "rose", ja: "バラ" },
+      { en: "sun", ja: "太陽" }, { en: "tree", ja: "木" }, { en: "umbrella", ja: "傘" },
+      { en: "violin", ja: "バイオリン" }, { en: "water", ja: "水" }, { en: "xylophone", ja: "木琴" },
+      { en: "yarn", ja: "毛糸" }, { en: "zebra", ja: "シマウマ" }
     ];
 
-    let currentWord = "";
-    let currentTranslation = "";
     let score = 0;
     let time = 30;
+    let currentWord = {};
+    let index = 0;
 
     const wordEl = document.getElementById("word");
-    const translationEl = document.getElementById("translation");
+    const meaningEl = document.getElementById("meaning");
     const inputEl = document.getElementById("input");
     const scoreEl = document.getElementById("score");
     const timerEl = document.getElementById("timer");
-
-    function getRandomWord() {
-      return wordsWithTranslations[Math.floor(Math.random() * wordsWithTranslations.length)];
-    }
+    const resultEl = document.getElementById("result");
 
     function setNewWord() {
-      [currentWord, currentTranslation] = getRandomWord();
-      wordEl.textContent = currentWord;
-      translationEl.textContent = `意味: ${currentTranslation}`;
+      currentWord = words[Math.floor(Math.random() * words.length)];
+      wordEl.textContent = currentWord.en;
+      meaningEl.textContent = `意味:${currentWord.ja}`;
       inputEl.value = "";
+      index = 0;
     }
 
     inputEl.addEventListener("input", () => {
-      const typed = inputEl.value;
-      if (currentWord.startsWith(typed)) {
-        if (typed === currentWord) {
-          score += 100;
-          scoreEl.textContent = `スコア: ${score}`;
-          setNewWord();
-        }
-      } else {
-        let correctPart = "";
-        for (let i = 0; i < typed.length; i++) {
-          if (typed[i] === currentWord[i]) {
-            correctPart += typed[i];
-          } else {
-            break;
-          }
-        }
-        inputEl.value = correctPart;
+      const value = inputEl.value;
+      if (value === currentWord.en) {
+        score += 100;
+        scoreEl.textContent = `Score: ${score}`;
+        setNewWord();
       }
     });
 
     function startGame() {
-      score = 0;
-      time = 30;
-      scoreEl.textContent = "スコア: 0";
       setNewWord();
-      inputEl.disabled = false;
-      inputEl.focus();
+      const timer = setInterval(() => {
+        time--;
+        timerEl.textContent = `Time: ${time}`;
+        if (time <= 0) {
+          clearInterval(timer);
+          inputEl.disabled = true;
+          resultEl.textContent = `ゲーム終了!最終スコア: ${score}`;
+        }
+      }, 1000);
+    }
 
-      const interval = s
-    
+    startGame();
+  </script>
 </body>
 </html>
