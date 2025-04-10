@@ -1,25 +1,121 @@
-<!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <title>中学生英単語タイピングゲーム</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f0f8ff;
+    }
+    #word {
+      font-size: 2em;
+      margin-bottom: 1em;
+    }
+    #input {
+      font-size: 1.5em;
+      padding: 0.5em;
+    }
+    #score, #timer {
+      margin: 1em;
+      font-size: 1.2em;
+    }
+    #translation {
+      font-size: 1em;
+      color: #555;
+      margin-bottom: 1em;
+    }
+  </style>
 </head>
 <body>
-    <font color ="#00FFFF">
-    <h1>そういちろう</h1>
-    </font>
-    <br><font color ="#FF0000">
-        <h2>~好きなもの~</h2>
-        </font>
-        KPOP
-    <br><font color ="#0000FF">
-        <h2>~趣味~</h2>
-        </font>
-        読書・ダンス・音楽を聴くこと・ハリーポッター
-     <br> <br>  
-     テクノロジーやデザイン、起業家精神を学び、世の中の社会問題を解決していきます！
-     これからも、たくさんの人と出会い、学び、挑戦しながら、自分だけの道を切りひらいていきます。どうぞよろしくお願いします！
+  <h1>英単語タイピングゲーム</h1>
+  <div id="timer">残り時間: 30秒</div>
+  <div id="score">スコア: 0</div>
+  <div id="word"></div>
+  <div id="translation"></div>
+  <input type="text" id="input" autocomplete="off" autofocus />
 
+  <script>
+    const wordsWithTranslations = [
+      ["apple", "りんご"], ["banana", "バナナ"], ["cat", "ねこ"], ["dog", "いぬ"], ["egg", "たまご"],
+      ["fish", "さかな"], ["goat", "やぎ"], ["hat", "ぼうし"], ["ice", "こおり"], ["juice", "ジュース"],
+      ["kite", "たこ（凧）"], ["lion", "ライオン"], ["moon", "つき"], ["nest", "す（巣）"], ["orange", "オレンジ"],
+      ["pen", "ペン"], ["queen", "じょおう（女王）"], ["rose", "バラ"], ["sun", "たいよう"], ["tree", "き（木）"],
+      ["umbrella", "かさ（傘）"], ["van", "バン（車）"], ["water", "みず"], ["xray", "レントゲン"], ["yarn", "あみもの糸"], ["zoo", "どうぶつえん"],
+      ["book", "ほん"], ["chair", "いす"], ["desk", "つくえ"], ["ear", "みみ"], ["frog", "かえる"],
+      ["game", "ゲーム"], ["hand", "て（手）"], ["island", "しま（島）"], ["jelly", "ゼリー"], ["king", "おう（王）"],
+      ["lamp", "ランプ"], ["milk", "ぎゅうにゅう"], ["net", "あみ"], ["ocean", "たいよう（大洋）"], ["pencil", "えんぴつ"],
+      ["quiz", "クイズ"], ["rain", "あめ（雨）"], ["star", "ほし"], ["tiger", "トラ"], ["uncle", "おじ"],
+      ["vase", "かびん"], ["wind", "かぜ（風）"], ["xylophone", "もっきん（木琴）"], ["yard", "にわ"], ["zip", "チャック／ファスナー"],
+      ["blue", "あお（青）"], ["red", "あか（赤）"], ["green", "みどり（緑）"], ["yellow", "きいろ（黄色）"], ["white", "しろ（白）"],
+      ["black", "くろ（黒）"], ["cold", "さむい"], ["hot", "あつい"], ["fast", "はやい"], ["slow", "おそい"],
+      ["big", "おおきい"], ["small", "ちいさい"], ["happy", "うれしい"], ["sad", "かなしい"], ["kind", "やさしい"],
+      ["mean", "いじわるな"], ["soft", "やわらかい"], ["hard", "かたい"], ["light", "かるい／あかるい"], ["dark", "くらい"],
+      ["clean", "きれいな"], ["dirty", "きたない"], ["early", "はやい（時間）"], ["late", "おそい（時間）"], ["rich", "おかねもち"],
+      ["poor", "びんぼうな"], ["sweet", "あまい"], ["sour", "すっぱい"], ["tall", "せがたかい"], ["short", "みじかい／ひくい"],
+      ["young", "わかい"], ["old", "としをとった"], ["nice", "すてきな"], ["bad", "わるい"], ["warm", "あたたかい"],
+      ["cool", "すずしい"], ["fun", "たのしい"], ["boring", "たいくつな"], ["smart", "あたまがいい"], ["dull", "のろい／たいくつな"],
+      ["safe", "あんぜんな"], ["risky", "あぶない"], ["sharp", "するどい"], ["quiet", "しずかな"], ["loud", "うるさい"],
+      ["neat", "きちんとした"], ["messy", "ちらかった"]
+    ];
+
+    let currentWord = "";
+    let currentTranslation = "";
+    let score = 0;
+    let time = 30;
+
+    const wordEl = document.getElementById("word");
+    const translationEl = document.getElementById("translation");
+    const inputEl = document.getElementById("input");
+    const scoreEl = document.getElementById("score");
+    const timerEl = document.getElementById("timer");
+
+    function getRandomWord() {
+      return wordsWithTranslations[Math.floor(Math.random() * wordsWithTranslations.length)];
+    }
+
+    function setNewWord() {
+      [currentWord, currentTranslation] = getRandomWord();
+      wordEl.textContent = currentWord;
+      translationEl.textContent = `意味: ${currentTranslation}`;
+      inputEl.value = "";
+    }
+
+    inputEl.addEventListener("input", () => {
+      const typed = inputEl.value;
+      if (currentWord.startsWith(typed)) {
+        if (typed === currentWord) {
+          score += 100;
+          scoreEl.textContent = `スコア: ${score}`;
+          setNewWord();
+        }
+      } else {
+        let correctPart = "";
+        for (let i = 0; i < typed.length; i++) {
+          if (typed[i] === currentWord[i]) {
+            correctPart += typed[i];
+          } else {
+            break;
+          }
+        }
+        inputEl.value = correctPart;
+      }
+    });
+
+    function startGame() {
+      score = 0;
+      time = 30;
+      scoreEl.textContent = "スコア: 0";
+      setNewWord();
+      inputEl.disabled = false;
+      inputEl.focus();
+
+      const interval = s
+    
 </body>
 </html>
