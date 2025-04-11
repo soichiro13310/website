@@ -2,25 +2,29 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title><クソ打タイピングゲーム</title>
+  <title>タイピングゲーム</title>
   <style>
     body { font-family: sans-serif; text-align: center; background-color: #f5f5f5; }
     h1 { margin-top: 30px; }
     #game { margin: 20px auto; padding: 20px; background: white; border-radius: 10px; width: 500px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     #word { font-size: 24px; margin: 10px 0; }
+    #highlightedWord { font-size: 24px; margin: 10px 0; color: #333; }
     #meaning { font-size: 18px; color: gray; }
     #input { width: 80%; padding: 10px; font-size: 18px; }
-    #score, #timer { font-size: 20px; margin-top: 10px; }
+    #score, #timer, #miss { font-size: 20px; margin-top: 10px; }
     #result { font-size: 22px; margin-top: 20px; color: green; }
+    .correct { color: green; }
+    .remaining { color: #999; }
   </style>
 </head>
 <body>
-  <h1>クソ打</h1>
+  <h1>英単語タイピングゲーム</h1>
   <div id="game">
-    <div id="word">Loading...</div>
+    <div id="highlightedWord">Loading...</div>
     <div id="meaning"></div>
     <input type="text" id="input" autofocus />
     <div id="score">Score: 0</div>
+    <div id="miss">Misses: 0</div>
     <div id="timer">Time: 30</div>
     <div id="result"></div>
   </div>
@@ -39,31 +43,49 @@
     ];
 
     let score = 0;
+    let misses = 0;
     let time = 30;
     let currentWord = {};
-    let index = 0;
 
-    const wordEl = document.getElementById("word");
+    const wordEl = document.getElementById("highlightedWord");
     const meaningEl = document.getElementById("meaning");
     const inputEl = document.getElementById("input");
     const scoreEl = document.getElementById("score");
     const timerEl = document.getElementById("timer");
     const resultEl = document.getElementById("result");
+    const missEl = document.getElementById("miss");
 
     function setNewWord() {
       currentWord = words[Math.floor(Math.random() * words.length)];
-      wordEl.textContent = currentWord.en;
-      meaningEl.textContent = `意味:${currentWord.ja}`;
+      meaningEl.textContent = `意味：${currentWord.ja}`;
       inputEl.value = "";
-      index = 0;
+      updateHighlightedWord(0);
+    }
+
+    function updateHighlightedWord(correctLen) {
+      const correct = currentWord.en.slice(0, correctLen);
+      const remaining = currentWord.en.slice(correctLen);
+      wordEl.innerHTML = `<span class="correct">${correct}</span><span class="remaining">${remaining}</span>`;
     }
 
     inputEl.addEventListener("input", () => {
-      const value = inputEl.value;
-      if (value === currentWord.en) {
+      const typed = inputEl.value;
+      const target = currentWord.en;
+
+      let i = 0;
+      while (i < typed.length && i < target.length && typed[i] === target[i]) {
+        i++;
+      }
+      updateHighlightedWord(i);
+
+      if (typed === target) {
         score += 100;
         scoreEl.textContent = `Score: ${score}`;
         setNewWord();
+      } else if (typed !== target.slice(0, typed.length)) {
+        misses++;
+        missEl.textContent = `Misses: ${misses}`;
+        inputEl.value = target.slice(0, i);
       }
     });
 
@@ -75,7 +97,7 @@
         if (time <= 0) {
           clearInterval(timer);
           inputEl.disabled = true;
-          resultEl.textContent = `ゲーム終了!最終スコア: ${score}`;
+          resultEl.textContent = `ゲーム終了！最終スコア: ${score}｜ミス回数: ${misses}`;
         }
       }, 1000);
     }
